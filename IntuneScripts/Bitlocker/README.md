@@ -33,7 +33,7 @@ Using `PSInvoker64.exe` instead of `powershell.exe` provides:
 ### As an Intune Win32 App
 
 1. Package the folder contents into an `.intunewin` file
-2. Install command: `powershell.exe -ExecutionPolicy Bypass -File BitlockerAAD-Install.ps1`
+2. Use the `Installer Sciprt` feature to upload the `BitlockerAAD-Install.ps1` script and make sure to use the 64-bit version
 3. Detection: Use `Detection.ps1` as a custom detection script
 
 ### Detection Script
@@ -50,7 +50,7 @@ The detection script verifies:
 
 ## Requirements
 
-- Windows 10/11 with Bitlocker capability
+- Windows /11 with Bitlocker capability
 - Device must be Entra ID joined (for key escrow)
 - Runs as SYSTEM
 - Internet access during install (to download PSInvoker64.exe)
