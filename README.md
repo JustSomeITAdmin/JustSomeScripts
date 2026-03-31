@@ -1,46 +1,24 @@
 # JustSomeScripts
 
-A collection of scripts and tools I use in my day-to-day as an IT admin. These are sanitized versions of production scripts — feel free to use, modify, and share.
+A collection of scripts and tools I use in my day-to-day as an IT admin. These are sanitized versions of production scripts — feel free to use, modify, and share. As always, test, test, test....and then test one more time.
 
 ## Repository Structure
 
 | Folder | Description |
 |--------|-------------|
 | [bin/](bin/) | Standalone executables and utilities used by other scripts |
-| [Intune/](Intune/) | Scripts for Microsoft Intune device management |
-| [WinPE/](WinPE/) | Scripts for Windows Preinstallation Environment |
+| [IntuneScripts/](IntuneScripts/) | Scripts for Microsoft Intune device management |
 
-## Scripts
+## Quick Links
 
-### Intune
+- [Drive Mapping](IntuneScripts/DriveMapping/) — Map network drives via Intune scheduled task
+- [Bitlocker to Go](IntuneScripts/Bitlocker/) — Escrow Bitlocker To Go keys to Entra ID
 
-| Script | Description |
-|--------|-------------|
-| [IntuneDriveMapping.ps1](Intune/IntuneDriveMapping.ps1) | Maps network drives via Intune using a scheduled task. Based on [intune-drive-mapping-generator](https://intunedrivemapping.azurewebsites.net) by [Nicola Suter](https://tech.nicolonsky.ch). |
-
-### bin
+## bin
 
 | File | Description |
 |------|-------------|
 | [Invoke-AppDeployToolkit.exe](bin/Invoke-AppDeployToolkit.exe) | PSInvoker — runs PowerShell scripts hidden in 64-bit. Originally from [PSAppDeployToolkit](https://psappdeploytoolkit.com/), redistributed under GPL. |
-
-## Usage
-
-Most scripts include comments explaining configuration. 
-
-For the Intune driver mapping, look for JSON blocks or variables near the top of each script and update them to match your environment.
-
-Example — update the drive mapping JSON in `IntuneDriveMapping.ps1`:
-
-```json
-{
-    "Path": "\\\\yourserver\\yourshare\\$env:username",
-    "DriveLetter": "H",
-    "Label": "Home Drive",
-    "Id": 1,
-    "GroupFilter": "Your AD Group Name"
-}
-```
 
 ## License
 
