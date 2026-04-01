@@ -14,6 +14,7 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 - [Drive Mapping](IntuneScripts/DriveMapping/) — Map network drives via Intune scheduled task
 - [Bitlocker to Go](IntuneScripts/Bitlocker/) — Escrow Bitlocker To Go keys to Entra ID
 - [Dell Command Update](IntuneScripts/Dell%20Command%20Update/) — Configure and trigger DCU on install via scheduled task
+- [Patch-WinRE](IntuneScripts/Patch-WinRE/) — Inject matched boot-critical drivers into the WinRE WIM via Intune
 
 ## bin
 
@@ -30,4 +31,5 @@ Third-party tools in `bin/` retain their original licenses (GPL where applicable
 ## Credits
 
 - [Nicola Suter / nicolonsky tech](https://tech.nicolonsky.ch) — original Intune Drive Mapping script
+- [MHimken](https://github.com/MHimken/WinRE-Customization) — WinRE patching script used by Patch-WinRE
 - [PSAppDeployToolkit](https://psappdeploytoolkit.com/) — PSInvoker executable

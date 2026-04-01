@@ -9,6 +9,7 @@ PowerShell scripts designed for deployment via Microsoft Intune. Each subfolder 
 | [Bitlocker/](Bitlocker/) | Escrow Bitlocker To Go recovery keys to Entra ID |
 | [Dell Command Update/](Dell%20Command%20Update/) | Configure and trigger Dell Command Update on install |
 | [DriveMapping/](DriveMapping/) | Map network drives based on AD group membership |
+| [Patch-WinRE/](Patch-WinRE/) | Inject boot-critical drivers into the WinRE WIM |
 
 ## General Notes
 
