@@ -69,7 +69,7 @@ foreach ($drive in $driveMappingConfig) {
 # Loop through each drive and check if it is mapped correctly
 foreach ($drive in $drives.GetEnumerator()) {
 	$driveLetter = $drive.Key
-	$correctPath = $drive.Value
+	$correctPath = $ExecutionContext.InvokeCommand.ExpandString($drive.Value)
 
 	# Check if the drive is currently mapped
 	$mappedDrive = Get-WmiObject -Query "SELECT * FROM Win32_NetworkConnection WHERE LocalName = '$driveLetter'" -ErrorAction SilentlyContinue
