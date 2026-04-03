@@ -242,6 +242,11 @@ if (-not (Test-RunningAsSystem)) {
 				$drive.Label = ""
 			}
 
+			#handle expansion of environment variables in the label
+            if ($drive.Label -match '\$env:') {
+				$drive.Label = $ExecutionContext.InvokeCommand.ExpandString($drive.Label)
+			}
+
 			$exists = $psDrives | Where-Object { $_.Path -eq $drive.Path -or $_.DriveLetter -eq $drive.DriveLetter }
 			$process = $true
 
