@@ -23,7 +23,12 @@ Injects boot-critical drivers into the WinRE (Windows Recovery Environment) WIM 
 Win32 app (`.intunewin` wrapping the three files).
 
 ### Install 
-Use the `PowerShell script` installer type with the file `Install.ps1`.
+Currently the `64-bit` option in the `PowerShell script` feature currently isn't working. We need to rely on the **sysnative** folder to call the script.
+
+~~Use the `PowerShell script` installer type with the file `Install.ps1`.~~
+
+Upload the .intunewin file, and then use the the following Install command:
+`%SystemRoot%\sysnative\WindowsPowerShell\v1.0\powershell.exe -file Install.ps1`
 
 
 ### Requirement Rule

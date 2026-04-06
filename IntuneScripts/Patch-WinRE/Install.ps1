@@ -35,4 +35,6 @@ if ($MatchedStorageDrivers) {
         if ((Test-Path -LiteralPath "HKLM:\SOFTWARE\WinRE") -ne $true) { New-Item "HKLM:\SOFTWARE\WinRE" -force -ea SilentlyContinue }
         New-ItemProperty -LiteralPath "HKLM:\SOFTWARE\WinRE" -Name 'WinRE-All-Inject' -Value Installed -PropertyType String -Force -ErrorAction SilentlyContinue 
     }
+    else { exit $LASTEXITCODE }
 }
+else { exit $LASTEXITCODE }
