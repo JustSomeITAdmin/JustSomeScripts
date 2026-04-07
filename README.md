@@ -11,10 +11,11 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 
 ## Quick Links
 
-- [Drive Mapping](IntuneScripts/DriveMapping/) — Map network drives via Intune scheduled task
-- [Bitlocker to Go](IntuneScripts/Bitlocker/) — Escrow Bitlocker To Go keys to Entra ID
-- [Dell Command Update](IntuneScripts/Dell%20Command%20Update/) — Configure and trigger DCU on install via scheduled task
-- [Patch-WinRE](IntuneScripts/Patch-WinRE/) — Inject matched boot-critical drivers into the WinRE WIM via Intune
+- [Drive Mapping](IntuneScripts/DriveMapping/) - Map network drives via Intune scheduled task
+- [Bitlocker to Go](IntuneScripts/Bitlocker/) - Escrow Bitlocker To Go keys to Entra ID
+- [Dell Command Update](IntuneScripts/Dell%20Command%20Update/) - Configure and trigger DCU on install via scheduled task
+- [Patch-WinRE](IntuneScripts/Patch-WinRE/) - Inject matched boot-critical drivers into the WinRE WIM via Intune
+- [Upgrade Windows Home To Pro](Upgrade%20Windows%20Home%20To%20Pro/) -  Upgrade systems with Windows Home to Pro using a MAK key
 
 ## bin
 
