@@ -1,6 +1,6 @@
 # OSDCloud Driver Injection via ConfigMgr Task Sequence
 
-Replaces traditional driver management (like Driver Automation Tool) with real-time driver downloads during WinPE. Instead of maintaining terabytes of staged driver packs, this approach parses the vendor's catalog on the fly, downloads the correct driver pack for the hardware model, and injects it before the first reboot — so the OS comes up with working storage and network drivers out of the box.
+Replaces traditional driver management (like Driver Automation Tool) with real-time driver downloads during WinPE. Instead of maintaining terabytes of staged driver packs, this approach parses the vendor's catalog on the fly, downloads the correct driver pack for the hardware model, and injects it before the first reboot. so the OS comes up with working storage and network drivers out of the box.
 
 This uses the [OSD PowerShell module](https://github.com/OSDeploy/OSD) (OSDCloud) and its `Invoke-OSDCloudDriverPackCM` function, with modifications to properly handle Dell and HP driver extraction and DISM injection during WinPE.
 
@@ -16,9 +16,10 @@ Some driver packs can't be injected during WinPE and must be applied after the O
 
 The screenshots below show the relevant ConfigMgr task sequence structure:
 
-![Task sequence overview — Set OS Disk variable](screenshots/SetOSDisk.png)
-![OSDCloud Fix step — the modification script](screenshots/OSDCloudFix.png)
 ![Load OSDCloud Drivers step](screenshots/LoadOSDCloudDrivers.png)
+![Task sequence overview. Set OS Disk variable](screenshots/SetOSDisk.png)
+![OSDCloud Fix step. The modification script](screenshots/OSDCloudFix.png)
+![OSDCloud Invoke Driver Pack. The actual script](screenshots/InvokeOSDDriverPack.png)
 
 ### Step-by-Step Flow
 
@@ -47,11 +48,11 @@ The OSDCloud module expects a task sequence variable called `OSDISK`. If your en
 
 **4. Apply the OSDCloud Fix (the important part)**
 
-The original `Invoke-OSDCloudDriverPackCM` function doesn't properly handle Dell driver packs in WinPE — it was primarily developed around HP hardware. `OSDCloud-Modification.ps1` overwrites the function in memory with a version that adds:
+The original `Invoke-OSDCloudDriverPackCM` function doesn't properly handle Dell driver packs in WinPE. It was primarily developed around HP hardware. `OSDCloud-Modification.ps1` overwrites the function in memory with a version that adds:
 
-- **Dell support** — Extracts Dell `.exe` driver packs using `/s /e=` and injects them with `dism.exe /Add-Driver /recurse`
-- **HP support** — Extracts HP SoftPaq `.exe` packs using `/s /f` and injects with DISM
-- **PPKG fallback** — If extraction fails (some packs don't support WinPE extraction), falls back to applying a provisioning package that installs drivers during the Specialize pass on first boot
+- **Dell support**: Extracts Dell `.exe` driver packs using `/s /e=` and injects them with `dism.exe /Add-Driver /recurse`
+- **HP support**: Extracts HP SoftPaq `.exe` packs using `/s /f` and injects with DISM
+- **PPKG fallback**: If extraction fails (some packs don't support WinPE extraction), falls back to applying a provisioning package that installs drivers during the Specialize pass on first boot
 
 The script works by locating the original `Invoke-OSDCloudDriverPackCM.ps1` in the OSD module directory and replacing its contents with the modified version before it runs.
 
@@ -67,7 +68,7 @@ This identifies the hardware model, finds a matching driver pack from the vendor
 
 **6. Continue the task sequence**
 
-The machine reboots into the OS with drivers already in place — storage, network, and everything else the driver pack includes.
+The machine reboots into the OS with drivers already in place. So things like storage, network, and everything else the driver pack includes are baked into the OS.
 
 ## What the Modification Script Does
 
@@ -89,8 +90,8 @@ The machine reboots into the OS with drivers already in place — storage, netwo
 
 ## Logs
 
-- `%OSDisk%\Windows\Debug\*-Invoke-OSDCloudDriverPackCM.log` — timestamped transcript of the driver download and injection process
+- `%OSDisk%\Windows\Debug\*-Invoke-OSDCloudDriverPackCM.log` Timestamped transcript of the driver download and injection process
 
 ## Credits
 
-- [OSDeploy / David Segura](https://github.com/OSDeploy/OSD) — OSD PowerShell module and OSDCloud
+- [OSDeploy / David Segura](https://github.com/OSDeploy/OSD) OSD PowerShell module and OSDCloud
