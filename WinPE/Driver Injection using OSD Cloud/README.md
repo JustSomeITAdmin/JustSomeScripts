@@ -37,7 +37,7 @@ This bootstraps the WinPE environment with the OSD module and installs curl (nee
 
 Apply your OS image as normal using your existing task sequence steps.
 
-**3. Set the OS Disk variable**
+**3. Set the OS Disk variable (Optional)**
 
 The OSDCloud module expects a task sequence variable called `OSDISK`. If your environment uses a different variable (e.g. `TargetDisk` from UI++), add a "Set Task Sequence Variable" step:
 
