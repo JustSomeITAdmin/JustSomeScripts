@@ -17,6 +17,8 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 - [Bitlocker to Go](IntuneScripts/Bitlocker/) - Escrow Bitlocker To Go keys to Entra ID
 - [Dell Command Update](IntuneScripts/Dell%20Command%20Update/) - Configure and trigger DCU on install via scheduled task
 - [Dell BIOS Update](IntuneScripts/Dell%20BIOS%20Update/) - Query Dell's current SDP catalog for the latest BIOS, stage the flash without rebooting (Remediation)
+- [Lenovo BIOS Update](IntuneScripts/Lenovo%20BIOS%20Update/) - Stage the latest BIOS via Lenovo's official LCU module, no reboot (Remediation; ThinkPad/ThinkStation)
+- [HP BIOS Update](IntuneScripts/HP%20BIOS%20Update/) - Stage the latest BIOS via HP CMSL (Get-HPBIOSUpdates), adaptive auth, no reboot (Remediation)
 - [Patch-WinRE](IntuneScripts/Patch-WinRE/) - Inject matched boot-critical drivers into the WinRE WIM via Intune
 - [Upgrade Windows Home To Pro](IntuneScripts/Upgrade%20Windows%20Home%20To%20Pro/) - Upgrade systems with Windows Home to Pro using a MAK key
 - [BIOS Password Retrieval](IntuneScripts/BIOS%20Password%20Retrieval/) - Retrieve the Intune-escrowed BIOS password for a device via Graph API
