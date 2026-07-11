@@ -2,12 +2,7 @@
 
 Scripts for injecting drivers during OS deployment via ConfigMgr task sequences. These run in WinPE before the first reboot, ensuring the OS comes up with working storage and network drivers.
 
-## Categories
-
-| Folder | Description |
-|--------|-------------|
-| [OSDCloud/](OSDCloud/) | Download and inject vendor driver packs using a modified OSDCloud function |
-| [Export Drivers from WinPE/](Export%20Drivers%20from%20WinPE/) | Export running WinPE drivers and inject them into the OS; useful for new hardware without a driver pack |
+Browse the subfolders above for each script — every one has its own README. The root [README](../README.md) has a one-line description of each.
 
 ## General Notes
 

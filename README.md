@@ -25,7 +25,7 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 - [Xerox Printer Install](IntuneScripts/Xerox%20Printer%20Install/) - Self-service Xerox AltaLink printer install: SNMP model detection, runtime V4 driver download, and Standard Accounting (PSADT v4.2) [only for AltraLink Cxxx models]
 
 ### WinPE / OS Deployment
-- [OSDCloud Driver Injection](WinPE/OSDCloud/) - Download and inject vendor driver packs during WinPE using a modified OSDCloud function
+- [OSDCloud Driver Injection](WinPE/Driver%20Injection%20using%20OSD%20Cloud/) - Download and inject vendor driver packs during WinPE using a modified OSDCloud function
 - [Export Drivers from WinPE](WinPE/Export%20Drivers%20from%20WinPE/) - Export running WinPE drivers and inject them into the OS for hardware without a driver pack
 
 ## bin
