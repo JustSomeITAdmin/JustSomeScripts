@@ -13,6 +13,7 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 ## Quick Links
 
 ### Intune
+- [Power Settings](IntuneScripts/Power%20Settings/) - Seed sensible power defaults (chassis + Modern Standby aware) and disable fast startup; cross-vendor, values stay user-changeable
 - [Drive Mapping](IntuneScripts/DriveMapping/) - Map network drives via Intune scheduled task
 - [Bitlocker to Go](IntuneScripts/Bitlocker/) - Escrow Bitlocker To Go keys to Entra ID
 - [Dell Command Update](IntuneScripts/Dell%20Command%20Update/) - Configure and trigger DCU on install via scheduled task
