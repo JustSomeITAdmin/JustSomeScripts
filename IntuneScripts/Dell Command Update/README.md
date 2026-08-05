@@ -2,7 +2,7 @@
 
 Configures and runs Dell Command Update (Universal) automatically when it is installed on a device. Deployed as an Intune **Platform Script** (runs as SYSTEM, one-time). Very useful to stage the task during ESP, and once ESP is over, and DCU is instlaled, the task is triggered after ESP.
 
-NOTE: This will only work for Dell Command Update Univerisal. If you install the classic version, it will not detect it. 
+NOTE: This will only work for Dell Command Update Univerisal. If you install the classic version, it will not detect it. I also recommend you have version 5.7.1 to prevent OOBE errors.
 
 ## How It Works
 
@@ -14,6 +14,7 @@ NOTE: This will only work for Dell Command Update Univerisal. If you install the
    - **Phase 1 — Configure:** Sets auto BitLocker suspend, manual schedule, disables update notifications, enables advanced driver restore. Optionally sets a BIOS password. Retries up to 20 times if DCU is still busy.
    - **Phase 2 — Lock Settings:** Locks the DCU configuration so end users cannot change it. Retries up to 20 times.
    - **Phase 3 — Apply Updates:** Runs `applyUpdates` for BIOS, firmware, and drivers with reboot disabled. Retries up to 20 times.
+5. The task and the inner script is deleted after a successful run. 
 
 ## Configuration
 
@@ -39,6 +40,3 @@ Leave it as `""` and the `-BiosPassword` flag is omitted from the DCU configure 
 
 - `C:\ProgramData\Dell\InvokeDCU-debug.log` — phase-by-phase log with timestamps and exit codes
 - `C:\ProgramData\Dell\DellCommandUpdate.log` — DCU's own update log from `applyUpdates`
-
-## To-do list
-- Remove file from C:\Windows\Tasks after task is completed. This is tricky because I want to make sure I am not deleting it too early.

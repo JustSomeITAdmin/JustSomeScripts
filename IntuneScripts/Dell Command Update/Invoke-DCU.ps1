@@ -4,6 +4,14 @@
 $BiosPassword = ""
 
 if ((Get-CimInstance -ClassName CIM_BIOSElement).Manufacturer -notmatch 'Dell|Alienware') { exit 0 }
+
+$t = Get-ScheduledTask -TaskName 'Run on Dell Command Update Install' -ErrorAction SilentlyContinue
+if ($t -and (Get-ScheduledTaskInfo -InputObject $t).LastTaskResult -eq 0) { 
+    if (Test-Path 'C:\Windows\Tasks\InvokeDCU.ps1') { Remove-Item 'C:\Windows\Tasks\InvokeDCU.ps1' -Force -ErrorAction SilentlyContinue }
+    Unregister-ScheduledTask -TaskName 'Run on Dell Command Update Install' -Confirm:$false
+    exit 0
+}
+
 $taskName = "Run on Dell Command Update Install"
 $taskDescription = "Triggers when MsiInstaller logs Event ID 1033 for Dell Command | Update for Windows Universal."
 
@@ -35,10 +43,22 @@ $configureArgs += ' -silent'
 $scriptContent = @'
 $log = 'C:\ProgramData\Dell\InvokeDCU-debug.log'
 $dcuPath = "C:\Program Files\Dell\CommandUpdate\dcu-cli.exe"
+$taskName = '##TASK_NAME##'
+$self = $PSCommandPath
 
 function Write-Log {
     param([string]$Message)
     "[$(Get-Date -Format s)] $Message" | Out-File -FilePath $log -Append -Encoding utf8
+}
+
+# One-shot: drop the script and the task so a later DCU upgrade doesn't re-fire event 1033.
+# Script first - deleting the task can take the running instance with it.
+function Exit-Clean {
+    param([int]$Code)
+    Write-Log "Cleaning up: removing $self and scheduled task '$taskName'"
+    Remove-Item -LiteralPath $self -Force -ErrorAction SilentlyContinue
+    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+    exit $Code
 }
 
 while (-not (Test-Path -LiteralPath $dcuPath)) {
@@ -70,7 +90,7 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
 
 if (-not $configured) {
     Write-Log "Configure never succeeded after $maxAttempts attempts"
-    exit 2
+    Exit-Clean 2
 }
 
 Start-Sleep -Seconds 2
@@ -95,7 +115,7 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
 
 if (-not $locked) {
     Write-Log "Lock settings never succeeded after $maxAttempts attempts"
-    exit 2
+    Exit-Clean 2
 }
 
 Start-Sleep -Seconds 2
@@ -120,16 +140,16 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
 
     if ($applyExit -eq 0) {
         Write-Log "ApplyUpdates succeeded"
-        exit 0
+        Exit-Clean 0
     }
     if ($applyExit -match '1|5') {
         Write-Log "ApplyUpdates succeeded, but a reboot is needed"
-        exit 0
+        Exit-Clean 0
     }
 
     if ($applyExit -eq 500) {
         Write-Log "No updates found; treating as success"
-        exit 0
+        Exit-Clean 0
     }
 
     Write-Log "ApplyUpdates returned retryable code 2, retrying in 30 seconds"
@@ -137,10 +157,11 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
 }
 
 Write-Log "ApplyUpdates never succeeded after $maxAttempts attempts"
-exit 2
+Exit-Clean 2
 '@
 
-($scriptContent -replace '##CONFIGURE_ARGS##', $configureArgs) | Set-Content 'C:\Windows\Tasks\InvokeDCU.ps1'
+($scriptContent -replace '##CONFIGURE_ARGS##', $configureArgs -replace '##TASK_NAME##', $taskName) |
+    Set-Content 'C:\Windows\Tasks\InvokeDCU.ps1'
 
 # Action to run when the event is detected
 # Replace this with your real command/script
