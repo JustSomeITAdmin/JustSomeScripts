@@ -113,7 +113,9 @@ stay in this folder; both are gitignored.
 git clone https://github.com/JustSomeITAdmin/JustSomeScripts.git
 cd JustSomeScripts\IntuneAnalyzer
 powershell -ExecutionPolicy Bypass -File .\install.ps1
-.ca-venv\Scriptsca.exe web
+.
+ca-venv\Scripts
+ca.exe web
 ```
 
 Requirements: **Windows** (parsers use `Get-WinEvent`, `expand.exe`,
@@ -259,3 +261,7 @@ data/               cases.db + per-case materialized files (gitignored)
 timeline, kept searchable by `events_fts`. `findings` / `finding_evidence`
 hold RCA output. `user_rules` holds no-code rules. `app_map` / `error_map` /
 `app_detection` are enrichment caches that persist across cases.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

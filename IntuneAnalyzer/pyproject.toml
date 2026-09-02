@@ -3,6 +3,7 @@ name = "intune-rca"
 version = "0.1.0"
 description = "Root-cause analysis agent for Intune diagnostics, Defender timelines, and supplemental collection scripts"
 readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.11"
 dependencies = [
     "typer>=0.12",
