@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Case {{ case.id }} · Intune RCA{% endblock %}
+{% block content %}
+<a href="/" class="muted">&larr; all cases</a>
+<button class="btn ghost" style="float:right" hx-post="/case/{{ case.id }}/delete" hx-swap="none"
+        hx-confirm="Delete case {{ case.id }} and all its parsed data? The original ZIP is not touched.">
+  Delete case</button>
+<h1>Case {{ case.id }}</h1>
+<p class="symptom">{{ case.symptom_text }}</p>
+
+<h2>Pipeline</h2>
+<div id="dropzone">
+  <strong>Drop a DiagLogs-*.zip here</strong> — or
+  <button class="btn" type="button" onclick="document.getElementById('zip-file').click()">Browse…</button>
+  <input type="file" id="zip-file" accept=".zip" style="display:none">
+  <div id="upload-progress" style="display:none">
+    <div id="upload-bar"></div><span id="upload-pct" class="muted"></span>
+  </div>
+</div>
+<div class="actions">
+  <form hx-post="/case/{{ case.id }}/ingest" hx-target="#action-status" hx-swap="innerHTML"
+        hx-disabled-elt="find button" style="position:relative">
+    <input type="text" name="zip_path" id="zip-path" placeholder="…or type/pick a path already on this machine"
+           autocomplete="off" style="min-width:28rem">
+    <div id="zip-suggest" style="display:none"></div>
+    <button class="btn" type="submit">Ingest path</button>
+  </form>
+  <button class="btn" hx-post="/case/{{ case.id }}/parse" hx-target="#action-status"
+          hx-disabled-elt="this">Parse all</button>
+  <button class="btn" hx-post="/case/{{ case.id }}/etl" hx-target="#action-status"
+          hx-disabled-elt="this">Decode WU ETL</button>
+  <button class="btn" hx-post="/case/{{ case.id }}/analyze" hx-target="#action-status"
+          hx-disabled-elt="this">Analyze</button>
+  <button class="btn ghost" hx-post="/case/{{ case.id }}/resolve" hx-target="#action-status"
+          hx-disabled-elt="this">Resolve names (Graph)</button>
+  <button class="btn ghost" hx-post="/case/{{ case.id }}/detection" hx-target="#action-status"
+          hx-disabled-elt="this">Detection rules (Graph)</button>
+  <button class="btn ghost" hx-post="/case/{{ case.id }}/profiles" hx-target="#action-status"
+          hx-disabled-elt="this">Config profiles (Graph)</button>
+  <span id="aspin" style="display:none"><span class="spinner"></span> <span id="aspin-text"></span></span>
+  <form method="get" action="/case/{{ case.id }}/report" class="report-dl">
+    <select name="format"><option value="html">HTML</option><option value="md">Markdown</option></select>
+    <select name="redact">
+      <option value="1">redacted</option>
+      <option value="0">full (sensitive)</option>
+    </select>
+    <button class="btn ghost" type="submit">Download report</button>
+  </form>
+</div>
+<div id="action-status" class="panel">
+  <p class="muted">Run a step; results show here. Typical order: Ingest &rarr; Parse all &rarr; Analyze
+  (then optionally Decode WU ETL, Resolve, Detection).</p>
+</div>
+
+<script>
+(function () {
+  // --- busy indicator: spinner + step name + elapsed seconds ---------------
+  var aspin = document.getElementById("aspin"), aspinText = document.getElementById("aspin-text");
+  var tick = null;
+  function busy(label) {
+    var t0 = Date.now();
+    aspin.style.display = "inline-flex";
+    clearInterval(tick);
+    tick = setInterval(function () {
+      var s = Math.floor((Date.now() - t0) / 1000);
+      aspinText.textContent = label + " … " + (s < 60 ? s + "s" : Math.floor(s / 60) + "m " + (s % 60) + "s");
+    }, 250);
+  }
+  function idle() { clearInterval(tick); aspin.style.display = "none"; }
+  document.body.addEventListener("htmx:beforeRequest", function (e) {
+    var el = e.detail.elt;
+    if (el.closest && el.closest(".actions")) busy((el.textContent || "Working").trim() || "Working");
+  });
+  document.body.addEventListener("htmx:afterRequest", idle);
+
+  // --- upload: drag-drop / Browse with a real progress bar ------------------
+  var zone = document.getElementById("dropzone"), fileInput = document.getElementById("zip-file");
+  var prog = document.getElementById("upload-progress"), bar = document.getElementById("upload-bar"),
+      pct = document.getElementById("upload-pct");
+  function upload(f) {
+    if (!f) return;
+    if (!/\.zip$/i.test(f.name)) { alert("Only .zip files."); return; }
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/case/{{ case.id }}/upload");
+    prog.style.display = "block"; bar.style.width = "0%"; pct.textContent = "";
+    xhr.upload.onprogress = function (e) {
+      if (!e.lengthComputable) return;
+      var p = Math.round(100 * e.loaded / e.total);
+      bar.style.width = p + "%";
+      pct.textContent = p < 100 ? "uploading " + f.name + " — " + p + "%"
+                                : "upload done — ingesting (this is the long part)…";
+      if (p >= 100) busy("Ingesting " + f.name);
+    };
+    xhr.onload = function () {
+      idle(); prog.style.display = "none";
+      document.getElementById("action-status").innerHTML = xhr.responseText;
+      if (xhr.status === 200 && xhr.getResponseHeader("HX-Trigger")) htmx.trigger(document.body, "case-changed");
+    };
+    xhr.onerror = function () { idle(); prog.style.display = "none"; pct.textContent = "upload failed"; };
+    var fd = new FormData();
+    fd.append("file", f);
+    xhr.send(fd);
+  }
+  fileInput.addEventListener("change", function () { upload(fileInput.files[0]); fileInput.value = ""; });
+  ["dragover", "dragenter"].forEach(function (ev) {
+    zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add("drag"); });
+  });
+  ["dragleave", "drop"].forEach(function (ev) {
+    zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove("drag"); });
+  });
+  zone.addEventListener("drop", function (e) { upload(e.dataTransfer.files[0]); });
+
+  // --- path suggestions: full-width clickable list (datalist truncates) -----
+  var input = document.getElementById("zip-path"), list = document.getElementById("zip-suggest");
+  var zips = [];
+  fetch("/zips").then(function (r) { return r.json(); }).then(function (d) { zips = d.zips; }).catch(function () {});
+  function render() {
+    var q = input.value.toLowerCase();
+    var hits = zips.filter(function (p) { return p.toLowerCase().indexOf(q) !== -1; }).slice(0, 12);
+    if (!hits.length) { list.style.display = "none"; return; }
+    list.innerHTML = "";
+    hits.forEach(function (p) {
+      var row = document.createElement("div");
+      row.className = "suggest-row";
+      row.textContent = p;
+      row.addEventListener("mousedown", function () { input.value = p; list.style.display = "none"; });
+      list.appendChild(row);
+    });
+    list.style.display = "block";
+  }
+  input.addEventListener("focus", render);
+  input.addEventListener("input", render);
+  input.addEventListener("blur", function () { setTimeout(function () { list.style.display = "none"; }, 150); });
+})();
+</script>
+
+<div id="case-state" hx-get="/case/{{ case.id }}/state" hx-trigger="case-changed from:body" hx-swap="innerHTML">
+  {% include "_case_state.html" %}
+</div>
+
+<div class="grid">
+  <section>
+    <h2>Finding detail</h2>
+    <div id="detail" class="panel"><p class="muted">Click a finding to see its evidence and fix.</p></div>
+  </section>
+  <section>
+    <h2>Agent investigation</h2>
+    <form hx-post="/case/{{ case.id }}/investigate" hx-target="#report" hx-swap="innerHTML"
+          hx-indicator="#spin" hx-disabled-elt="find button">
+      <input type="text" name="model" placeholder="model (blank = default)" autocomplete="off">
+      <button class="btn" type="submit">Run local LLM</button>
+      <span id="spin" class="htmx-indicator muted"> running (~1 min)…</span>
+    </form>
+    <div id="report" class="panel"></div>
+  </section>
+</div>
+
+<h2>Timeline search</h2>
+<form hx-post="/case/{{ case.id }}/timeline" hx-target="#timeline-results" hx-swap="innerHTML">
+  <input type="text" name="q" placeholder="full-text query (e.g. 0x80070032, not detected)…" autocomplete="off">
+  <select name="source">
+    <option value="">any source</option>
+    {% for s in sources %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+  </select>
+  <select name="severity">
+    <option value="">any severity</option>
+    <option value="error">error</option><option value="warn">warn</option><option value="info">info</option>
+  </select>
+  <button class="btn" type="submit">Search</button>
+</form>
+<div id="timeline-results" class="panel"><p class="muted">Times shown in device-local ({{ tz }}).</p></div>
+{% endblock %}

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Intune RCA{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="{{ htmx_src }}"></script>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">Intune RCA</a>
+    <nav>
+      <a href="/">Cases</a>
+      <a href="/rules">Rules</a>
+      <a href="/errorcodes">Error codes</a>
+    </nav>
+    <span class="muted">local · runs on this machine</span>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

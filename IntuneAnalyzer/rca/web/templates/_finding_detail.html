@@ -1,0 +1,18 @@
+<h3 class="sev-{{ f.severity }}">{{ f.title }}</h3>
+<p class="muted">severity <b>{{ f.severity }}</b> · confidence <b>{{ f.confidence }}</b> · rule <code>{{ f.rule_id }}</code></p>
+<h4>Summary</h4>
+<p>{{ f.summary }}</p>
+<h4>Recommendation</h4>
+<p>{{ f.recommendation }}</p>
+{% if ev %}
+<h4>Evidence</h4>
+<table class="ev">
+  <thead><tr><th>Time</th><th>Src</th><th>Code</th><th>Message</th></tr></thead>
+  <tbody>
+  {% for e in ev %}
+    <tr><td class="mono">{{ e.ts_local or e.ts_utc }}</td><td>{{ e.source }}</td>
+        <td class="mono">{{ e.event_code or "" }}</td><td>{{ (e.message or "")[:160] }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}

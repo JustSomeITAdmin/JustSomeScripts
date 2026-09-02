@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Rules · Intune RCA{% endblock %}
+{% block content %}
+<h1>Rules</h1>
+<p class="muted">Rules turn the parsed timeline into findings. Built-in rules are Python
+(advanced); the ones below you can add here with no code.</p>
+
+<h2>Add a rule (no code)</h2>
+<form hx-post="/rules" hx-swap="none" class="rule-form">
+  <div class="rf-row">
+    <label>Name<input type="text" name="name" placeholder="e.g. WU all-updates-failed" required></label>
+    <label>Finding title<input type="text" name="title" placeholder="supports {count} {actor} {code}"></label>
+  </div>
+  <div class="rf-row">
+    <label>Source
+      <select name="match_source">
+        <option value="">any</option>
+        <option value="IME">IME</option><option value="evtx">evtx</option>
+        <option value="MSI">MSI</option><option value="WU">WU</option>
+      </select>
+    </label>
+    <label>Event code<input type="text" name="match_code" placeholder="e.g. 0x80240022"></label>
+    <label>Message contains<input type="text" name="match_contains" placeholder="substring"></label>
+    <label>Event severity
+      <select name="match_severity">
+        <option value="">any</option><option value="error">error</option>
+        <option value="warn">warn</option><option value="critical">critical</option>
+        <option value="info">info</option>
+      </select>
+    </label>
+  </div>
+  <div class="rf-row">
+    <label>Min count<input type="number" name="min_count" value="1" min="1" style="width:5rem"></label>
+    <label><input type="checkbox" name="group_by_actor" value="1"> one finding per app</label>
+    <label>Finding severity
+      <select name="severity"><option>warn</option><option>error</option><option>info</option></select>
+    </label>
+    <label>Confidence
+      <select name="confidence"><option>medium</option><option>high</option><option>low</option></select>
+    </label>
+  </div>
+  <label>Recommendation <span class="muted">(blank = use the error-code map for the chosen code)</span>
+    <textarea name="recommendation" rows="2" placeholder="what a tech should do"></textarea>
+  </label>
+  <button class="btn" type="submit">Add rule</button>
+</form>
+
+<h2>Your rules ({{ user_rules|length }})</h2>
+{% if user_rules %}
+<table>
+  <thead><tr><th></th><th>Name</th><th>Matches</th><th>Finding</th><th></th></tr></thead>
+  <tbody>
+  {% for r in user_rules %}
+    <tr class="{{ '' if r.enabled else 'muted' }}">
+      <td>
+        <button class="btn ghost" hx-post="/rules/{{ r.id }}/toggle" hx-swap="none"
+                title="enable/disable">{{ 'on' if r.enabled else 'off' }}</button>
+      </td>
+      <td>{{ r.name }}</td>
+      <td class="mono">
+        {% if r.match_source %}source={{ r.match_source }} {% endif %}
+        {% if r.match_code %}code={{ r.match_code }} {% endif %}
+        {% if r.match_contains %}~"{{ r.match_contains }}" {% endif %}
+        {% if r.match_severity %}sev={{ r.match_severity }} {% endif %}
+        {% if r.group_by_actor %}per-app {% endif %}≥{{ r.min_count }}
+      </td>
+      <td><span class="badge {{ r.severity }}">{{ r.severity }}</span> {{ r.title }}</td>
+      <td><button class="btn ghost" hx-post="/rules/{{ r.id }}/delete" hx-swap="none"
+                  hx-confirm="Delete rule '{{ r.name }}'?">delete</button></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p class="muted">No custom rules yet.</p>
+{% endif %}
+
+<h2>Built-in rules ({{ builtins|length }})</h2>
+<table>
+  <thead><tr><th>Rule</th><th>Source</th></tr></thead>
+  <tbody>
+  {% for b in builtins %}
+    <tr><td class="mono">{{ b.name }}</td><td>{{ b.source }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted">Built-in rules live in <code>rca/rules.py</code>; drop-in Python rules go in
+<code>custom_rules/</code>. After changing rules, re-run Analyze on a case.</p>
+{% endblock %}

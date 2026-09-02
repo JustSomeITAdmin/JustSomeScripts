@@ -1,0 +1,30 @@
+# Runtime data: SQLite DB + materialized raw artifacts (can be large + contain PII)
+/data/
+
+# Evidence packages — never commit
+*.zip
+*.cab
+*.evtx
+*.etl
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Secrets (Graph API creds, etc.)
+.env
+
+# Generated / device-specific runtime artifacts (org-specific, never commit)
+rca-collect-*.ps1          # generated supplemental collectors (contain detection key paths)
+rca-supplemental-*.json    # device collection output (registry/file facts)
+sim-supplemental-*.json
+_testvenv/
+rca-venv/
+*.whl
+
+# Error Hunter catalog cache (downloaded; refresh with: rca errormap --fetch-hunter)
+/errorhunter/

@@ -1,0 +1,20 @@
+{% if not rows %}
+  <p class="muted">No matching events.</p>
+{% else %}
+<table class="ev">
+  <thead><tr><th>Time (local)</th><th>Src</th><th>Sev</th><th>Code</th><th>App/Provider</th><th>Message</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="sev-{{ r.severity }}">
+      <td class="mono">{{ r.ts_local or (r.ts_utc ~ " UTC") }}</td>
+      <td>{{ r.source }}</td>
+      <td><span class="badge {{ r.severity }}">{{ r.severity }}</span></td>
+      <td class="mono">{{ r.event_code or "" }}</td>
+      <td class="mono">{{ (r.actor or "")[:24] }}</td>
+      <td>{{ (r.message or "")[:160] }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted">{{ rows|length }} event(s).</p>
+{% endif %}

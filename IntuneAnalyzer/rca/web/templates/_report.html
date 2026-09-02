@@ -1,0 +1,10 @@
+<p class="muted">{{ model }} · {{ steps }} step(s) · {{ trace|length }} tool call(s)</p>
+<pre class="report">{{ report }}</pre>
+{% if trace %}
+<details>
+  <summary class="muted">tool calls</summary>
+  <ol class="trace">
+  {% for t in trace %}<li><code>{{ t.tool }}</code> {{ t.args }}</li>{% endfor %}
+  </ol>
+</details>
+{% endif %}

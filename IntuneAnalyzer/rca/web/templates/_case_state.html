@@ -1,0 +1,48 @@
+<div class="meta">
+  {% if bundle %}
+  <span><b>Machine</b> {{ bundle.machine_name or "—" }}</span>
+  <span><b>Collected</b> {{ bundle.collected_utc or "—" }}</span>
+  <span><b>Device TZ</b> {{ tz }}</span>
+  {% endif %}
+  <span><b>Events</b>
+    {% for s in by_source %}{{ s.source }}={{ s.n }}{% if not loop.last %}, {% endif %}{% else %}none yet — ingest + parse{% endfor %}
+  </span>
+</div>
+
+<div class="grid">
+  <section>
+    <h2>Findings</h2>
+    <table class="findings">
+      <thead><tr><th>Sev</th><th>Conf</th><th>Ev</th><th>Finding</th></tr></thead>
+      <tbody>
+      {% for f in findings %}
+        <tr class="row sev-{{ f.severity }}"
+            hx-get="/case/{{ case.id }}/finding/{{ f.id }}" hx-target="#detail" hx-swap="innerHTML">
+          <td><span class="badge {{ f.severity }}">{{ f.severity }}</span></td>
+          <td>{{ f.confidence }}</td>
+          <td>{{ f.evidence }}</td>
+          <td>{{ f.title }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">No findings yet — run <b>Analyze</b>.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Failing apps</h2>
+    {% if apps %}
+    <table>
+      <thead><tr><th>App</th><th>Errors</th><th>Code</th></tr></thead>
+      <tbody>
+      {% for a in apps %}
+        <tr><td>{{ a.display_name or a.actor }}</td><td>{{ a.errors }}</td><td class="mono">{{ a.code or "" }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">No failing apps yet.</p>
+    {% endif %}
+  </section>
+</div>

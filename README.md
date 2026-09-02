@@ -9,6 +9,7 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 | [bin/](bin/) | Standalone executables and utilities used by other scripts |
 | [IntuneScripts/](IntuneScripts/) | Scripts for Microsoft Intune device management |
 | [WinPE/](WinPE/) | Scripts for driver injection during OS deployment (WinPE / ConfigMgr) |
+| [IntuneAnalyzer/](IntuneAnalyzer/) | Local-first root-cause analysis for Intune "Collect diagnostics" ZIPs — parse, correlate, rank findings with evidence (Python + PowerShell + SQLite, optional local LLM) |
 
 ## Quick Links
 
@@ -24,6 +25,9 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 - [Upgrade Windows Home To Pro](IntuneScripts/Upgrade%20Windows%20Home%20To%20Pro/) - Upgrade systems with Windows Home to Pro using a MAK key
 - [BIOS Password Retrieval](IntuneScripts/BIOS%20Password%20Retrieval/) - Retrieve the Intune-escrowed BIOS password for a device via Graph API
 - [Xerox Printer Install](IntuneScripts/Xerox%20Printer%20Install/) - Self-service Xerox AltaLink printer install: SNMP model detection, runtime V4 driver download, and Standard Accounting (PSADT v4.2) [only for AltraLink Cxxx models]
+
+### Intune Analyzer
+- [IntuneAnalyzer](IntuneAnalyzer/) - Drop in a `DiagLogs-*.zip`, get ranked evidence-cited findings: Win32 app failures, ESP wedges, BitLocker recovery triggers (Secure Boot CA / boot-manager swap / firmware), LocalUsersAndGroups replace bugs, unattended BIOS flashes, WHfB tombstones, WU/restart collisions. Web UI + CLI; drop-in Python rules; runs entirely on your machine (`install.ps1`)
 
 ### WinPE / OS Deployment
 - [OSDCloud Driver Injection](WinPE/Driver%20Injection%20using%20OSD%20Cloud/) - Download and inject vendor driver packs during WinPE using a modified OSDCloud function

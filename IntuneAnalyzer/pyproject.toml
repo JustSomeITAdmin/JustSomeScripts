@@ -1,0 +1,33 @@
+[project]
+name = "intune-rca"
+version = "0.1.0"
+description = "Root-cause analysis agent for Intune diagnostics, Defender timelines, and supplemental collection scripts"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.7",
+    "msal>=1.28",
+    "requests>=2.31",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "truststore>=0.9",   # OS cert store, so fetches work behind TLS inspection (Zscaler)
+]
+
+[project.scripts]
+rca = "rca.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["rca*"]
+
+# Ship non-Python assets so a wheel works on another machine: web templates/static
+# (Jinja + htmx + css) and the PowerShell workers.
+[tool.setuptools.package-data]
+"rca" = ["ps/*.ps1"]
+"rca.web" = ["templates/*.html", "static/*"]

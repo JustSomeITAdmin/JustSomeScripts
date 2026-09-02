@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Cases</h1>
+<form hx-post="/cases" hx-swap="none" class="newcase">
+  <input type="text" name="symptom" placeholder="New case — describe the symptom…" autocomplete="off">
+  <button class="btn" type="submit">New case</button>
+</form>
+{% if not cases %}
+  <p class="muted">No cases yet. Create one from the CLI: <code>rca new-case -s "…"</code> then <code>rca ingest</code>.</p>
+{% else %}
+<table>
+  <thead><tr><th>ID</th><th>Created (UTC)</th><th>Machine</th><th>Status</th><th>Findings</th><th>Symptom</th></tr></thead>
+  <tbody>
+  {% for c in cases %}
+    <tr class="row" onclick="location.href='/case/{{ c.id }}'">
+      <td>{{ c.id }}</td>
+      <td class="mono">{{ c.created_utc }}</td>
+      <td>{{ c.machine or "—" }}</td>
+      <td>{{ c.status }}</td>
+      <td>{{ c.findings }}</td>
+      <td>{{ (c.symptom_text or "")[:80] }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

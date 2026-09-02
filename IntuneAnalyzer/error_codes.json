@@ -1,0 +1,212 @@
+{
+  "0x87D1041C": {
+    "family": "Intune Win32",
+    "label": "installed but not detected",
+    "confidence": "high",
+    "recommendation": "Install completed but the detection rule didn't match (commonly the app was uninstalled, or detection doesn't match what the installer leaves). Verify the detection rule (file/registry/MSI product code) against the device; if MSI, confirm the ProductCode; if a script, run it and check its exit/output."
+  },
+  "0x87D30017": {
+    "family": "Intune Win32",
+    "label": "Win32 app reported failed (enforcement)",
+    "confidence": "low",
+    "recommendation": "Not in Microsoft's published app-error list. Observed in this environment on uninstall-intent apps. Check the app's requirement rules and that the uninstall command actually clears the detection; review AppWorkload.log around these events."
+  },
+  "0x8000FFFF": {
+    "family": "Windows",
+    "label": "unexpected/catastrophic failure",
+    "confidence": "high",
+    "recommendation": "An unexpected error occurred. Check the installation logs and the Windows event logs around the failure time."
+  },
+  "0x80004005": {
+    "family": "Windows",
+    "label": "unspecified error (E_FAIL)",
+    "confidence": "high",
+    "recommendation": "Generic failure. Correlate with the installer/MSI log and nearby event-log errors."
+  },
+  "0x80070002": {
+    "family": "Windows",
+    "label": "file not found",
+    "confidence": "high",
+    "recommendation": "A required file or path was missing. Check the install command's working dir, content download, and that referenced files exist."
+  },
+  "0x80070005": {
+    "family": "Windows",
+    "label": "access denied",
+    "confidence": "high",
+    "recommendation": "Permission denied. Confirm install context (system vs user) and that AV/EDR isn't blocking the IMECache/Content folders."
+  },
+  "0x80070032": {
+    "family": "Windows",
+    "label": "the request is not supported (ERROR_NOT_SUPPORTED)",
+    "confidence": "high",
+    "recommendation": "The operation isn't supported in this state/context \u2014 often benign in WU traces; investigate only if it correlates with a user-visible failure."
+  },
+  "0x80091007": {
+    "family": "Windows",
+    "label": "hash value is not correct",
+    "confidence": "high",
+    "recommendation": "Downloaded content is corrupt or altered. Re-download; check proxy/inspection devices that may be modifying content."
+  },
+  "0x800705B4": {
+    "family": "Windows",
+    "label": "operation timed out",
+    "confidence": "high",
+    "recommendation": "A step exceeded its timeout. Check connectivity and whether the installer is waiting on something (prompt, service)."
+  },
+  "0xC0000142": {
+    "family": "Windows",
+    "label": "DLL initialization failed",
+    "confidence": "high",
+    "recommendation": "A process failed to start (often a session-0/desktop-less context issue). Verify the app supports silent/system-context install."
+  },
+  "0x80040154": {
+    "family": "Windows",
+    "label": "class not registered",
+    "confidence": "high",
+    "recommendation": "A required COM component isn't registered. Check prerequisites/runtimes."
+  },
+  "0x80073CF0": {
+    "family": "AppX",
+    "label": "package could not be opened (unsigned / publisher mismatch)",
+    "confidence": "high",
+    "recommendation": "Check the AppxPackaging/Operational event log; ensure the package is properly signed and the publisher matches."
+  },
+  "0x80073CF3": {
+    "family": "AppX",
+    "label": "package conflict / dependency missing / wrong architecture",
+    "confidence": "high",
+    "recommendation": "Check AppXDeployment-Server log: a dependency is missing, it conflicts with an installed package, or the architecture is wrong."
+  },
+  "0x80073CFB": {
+    "family": "AppX",
+    "label": "package already installed, reinstall blocked",
+    "confidence": "high",
+    "recommendation": "The same-version package is present but not bit-identical. Bump the version and re-sign, or remove the old package for all users first."
+  },
+  "0x80073CFF": {
+    "family": "AppX",
+    "label": "sideloading not enabled",
+    "confidence": "high",
+    "recommendation": "Enable AllowAllTrustedApps / sideloading, or deploy via the Store."
+  },
+  "1603": {
+    "family": "MSI",
+    "label": "fatal error during installation",
+    "confidence": "high",
+    "recommendation": "Open the .msi.log; find the first 'Return value 3' or failed custom action above the result line to locate the failing action."
+  },
+  "1618": {
+    "family": "MSI",
+    "label": "another installation already in progress",
+    "confidence": "high",
+    "recommendation": "A concurrent MSI was running. IME usually retries; if persistent, check for a stuck msiexec or competing installer."
+  },
+  "1619": {
+    "family": "MSI",
+    "label": "installation package could not be opened",
+    "confidence": "high",
+    "recommendation": "The .msi path is missing/inaccessible or the package is corrupt."
+  },
+  "1620": {
+    "family": "MSI",
+    "label": "installation package could not be opened (invalid)",
+    "confidence": "high",
+    "recommendation": "The package is not a valid installer or is damaged."
+  },
+  "1622": {
+    "family": "MSI",
+    "label": "error opening installation log file",
+    "confidence": "high",
+    "recommendation": "The specified log path is invalid/unwritable."
+  },
+  "1633": {
+    "family": "MSI",
+    "label": "platform not supported",
+    "confidence": "high",
+    "recommendation": "The package doesn't support this architecture (e.g. x86 vs x64/ARM64)."
+  },
+  "1638": {
+    "family": "MSI",
+    "label": "another version of this product is already installed",
+    "confidence": "high",
+    "recommendation": "Uninstall the existing version or use a major upgrade; check the detection/supersedence configuration."
+  },
+  "1639": {
+    "family": "MSI",
+    "label": "invalid command-line argument",
+    "confidence": "high",
+    "recommendation": "Review the install/uninstall command line passed to msiexec."
+  },
+  "1605": {
+    "family": "MSI",
+    "label": "action valid only for installed products",
+    "confidence": "high",
+    "recommendation": "An uninstall/repair targeted a product that isn't installed."
+  },
+  "1612": {
+    "family": "MSI",
+    "label": "installation source unavailable",
+    "confidence": "high",
+    "recommendation": "The original install source is missing \u2014 needed for repair/uninstall."
+  },
+  "3010": {
+    "family": "MSI",
+    "label": "success \u2014 reboot required",
+    "confidence": "high",
+    "recommendation": "Install succeeded; a restart is required to complete. Not a failure."
+  },
+  "3011": {
+    "family": "MSI",
+    "label": "success \u2014 reboot required (uninstall)",
+    "confidence": "high",
+    "recommendation": "Uninstall succeeded; a restart is required to complete."
+  },
+  "0x80240009": {
+    "family": "WU",
+    "label": "another conflicting operation in progress (WU_E_OPERATIONINPROGRESS)",
+    "confidence": "high",
+    "recommendation": "Two WU operations overlapped. Usually transient; investigate if persistent."
+  },
+  "0x8024000C": {
+    "family": "WU",
+    "label": "no operation was required (WU_E_NOOP)",
+    "confidence": "high",
+    "recommendation": "WU determined nothing needed to be done \u2014 typically not an error."
+  },
+  "0x80248007": {
+    "family": "WU",
+    "label": "requested info not in the data store (WU_E_DS_NODATA)",
+    "confidence": "high",
+    "recommendation": "The WU data store lacked expected data \u2014 often after a reset or first scan; investigate only if updates are actually failing."
+  },
+  "0x80240022": {
+    "family": "WU",
+    "label": "all updates failed to install (WU_E_ALL_UPDATES_FAILED)",
+    "confidence": "high",
+    "recommendation": "Every update in the operation failed \u2014 check the WindowsUpdate timeline for the first underlying error."
+  },
+  "1": {
+    "family": "Windows",
+    "label": "incorrect function",
+    "confidence": "high",
+    "recommendation": "Review the Windows event logs around the failure with the install logs."
+  },
+  "2": {
+    "family": "Windows",
+    "label": "the system cannot find the file specified",
+    "confidence": "high",
+    "recommendation": "A referenced file is missing; repair the system file or reinstall the app."
+  },
+  "0x80073712": {
+    "family": "Windows",
+    "label": "component store corrupt (ERROR_SXS_COMPONENT_STORE_CORRUPT)",
+    "confidence": "high",
+    "recommendation": "Two variants. (a) Real store corruption: `DISM /Online /Cleanup-Image /RestoreHealth` + `sfc /scannow`, reboot, retry. (b) If DISM/SFC succeed but the update still fails: check CBS.log for 'Not able to find ...\\SoftwareDistribution\\Download\\...' right before the CorruptManifest mark \u2014 that's an incomplete DOWNLOAD (often a Feature-on-Demand payload like RSAT/DFS tools), not store corruption. Fix: stop wuauserv+bits, delete SoftwareDistribution\\Download, restart, re-scan; if it recurs, remove/re-add the FoD or install the CU manually from the Update Catalog. In-place repair upgrade is the last resort."
+  },
+  "0x80240016": {
+    "family": "WU",
+    "label": "install not allowed right now (WU_E_INSTALL_NOT_ALLOWED)",
+    "confidence": "high",
+    "recommendation": "Another install was in progress or a reboot was pending. Usually transient; reboot and retry. Recurring: check for a wedged installer or pending-reboot state."
+  }
+}

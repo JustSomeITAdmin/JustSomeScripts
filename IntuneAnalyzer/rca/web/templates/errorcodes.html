@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Error codes · Intune RCA{% endblock %}
+{% block content %}
+<h1>Error code map ({{ codes|length }})</h1>
+<p class="muted">Plain-English meanings used in findings and as defaults for no-code rules.
+Edit <code>{{ path }}</code> to add or correct codes (no reinstall needed).</p>
+<p class="muted">
+  Error Hunter fallback:
+  {% if hunter_n %}
+    <strong>{{ hunter_n }}</strong> codes cached offline — any code not in the table
+    above still resolves via <a href="https://errorhunter.msnugget.com" target="_blank" rel="noopener">errorhunter.msnugget.com</a>'s catalog.
+    <button class="btn ghost" hx-post="/errorcodes/fetch-hunter" hx-swap="none">refresh</button>
+  {% else %}
+    not fetched.
+    <button class="btn ghost" hx-post="/errorcodes/fetch-hunter" hx-swap="none">Fetch catalog (one-time download)</button>
+  {% endif %}
+</p>
+<table>
+  <thead><tr><th>Code</th><th>Family</th><th>Meaning</th><th>Recommendation</th></tr></thead>
+  <tbody>
+  {% for c in codes %}
+    <tr>
+      <td class="mono">{{ c.code }}</td>
+      <td>{{ c.family }}</td>
+      <td>{{ c.label }}</td>
+      <td class="muted">{{ (c.recommendation or "")[:160] }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
