@@ -36,6 +36,16 @@ try {
     $events = Get-WinEvent -FilterHashtable $filter -MaxEvents $Max -ErrorAction Stop
 
     foreach ($e in $events) {
+        $msg = $e.Message
+        # Some providers render a fixed sentence and keep the verdict in EventData
+        # (TPM/17 "hardware failed to execute a TPM command" hides the command
+        # ordinal + response code). Append the data pairs so rules can see them.
+        if ($e.ProviderName -eq 'TPM') {
+            try {
+                $pairs = ([xml]$e.ToXml()).Event.EventData.Data | ForEach-Object { "$($_.Name)=$($_.'#text')" }
+                if ($pairs) { $msg = "$msg [EventData: $($pairs -join '; ')]" }
+            } catch { }
+        }
         $obj = [pscustomobject]@{
             TimeCreated      = $e.TimeCreated.ToUniversalTime().ToString('o')
             Id               = $e.Id
@@ -43,7 +53,7 @@ try {
             LevelDisplayName = $e.LevelDisplayName
             Provider         = $e.ProviderName
             RecordId         = $e.RecordId
-            Message          = $e.Message
+            Message          = $msg
         }
         [void]$records.Add(($obj | ConvertTo-Json -Depth 4 -Compress))
     }
