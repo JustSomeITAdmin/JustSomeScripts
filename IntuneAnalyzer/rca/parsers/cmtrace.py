@@ -43,7 +43,7 @@ class CmRecord:
 
 def looks_like_cmtrace(text: str) -> bool:
     """Cheap sniff: CMTrace files open with (optional BOM then) `<![LOG[`."""
-    head = text.lstrip("﻿")[:512]
+    head = text.lstrip("﻿")[:512]   # strip a UTF-8 BOM if present
     return "<![LOG[" in head and "]LOG]!>" in head
 
 
