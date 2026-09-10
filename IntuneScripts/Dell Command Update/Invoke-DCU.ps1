@@ -53,16 +53,20 @@ function Write-Log {
 
 # DCU skips the BIOS flash while BitLocker conversion is running, which it always is during ESP.
 # -autoSuspendBitLocker only suspends protection, not the conversion - manage-bde -pause does that.
+$script:paused = $false
 function Suspend-Conversion {
     $status = (Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus
     if ($status -like '*InProgress') {
         Write-Log "BitLocker status is $status; pausing conversion so the BIOS update isn't skipped"
         & "$env:SystemRoot\System32\manage-bde.exe" -pause $env:SystemDrive 2>&1 | Out-Null
+        $script:paused = $true
     }
 }
 
 # Must run on every exit path - a paused conversion left behind never finishes encrypting.
 function Resume-Conversion {
+    if (-not $script:paused) { return }
+    $script:paused = $false
     & "$env:SystemRoot\System32\manage-bde.exe" -resume $env:SystemDrive 2>&1 | Out-Null
     Write-Log "Resumed BitLocker conversion; status is now $((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus)"
 }
