@@ -37,7 +37,10 @@ $channels = @(
     'Microsoft-Windows-WMI-Activity/Operational',
     'Microsoft-Windows-TaskScheduler/Operational',
     'Microsoft-Windows-Audio/CaptureMonitor',                # mic capture session start/stop (dropout cases)
-    'Microsoft-Windows-Audio/Operational'
+    'Microsoft-Windows-Audio/Operational',
+    'Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational',   # RDP: 1149 auth OK, 1158 conn attempts
+    'Microsoft-Windows-TerminalServices-LocalSessionManager/Operational',       # RDP: 21/24/25 session logon/disconnect
+    'Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational'            # RDP: 131 TCP accept (client IP), 140 NLA failure
 )
 foreach ($ch in $channels) {
     $safe = $ch -replace '[\\/ ]', '_'
@@ -45,6 +48,8 @@ foreach ($ch in $channels) {
     wevtutil epl "$ch" "$dest" 2>$null
     if (-not (Test-Path $dest)) { Log "skip (no access/log): $ch" }
 }
+# Security is too big to ship whole; export only logon outcomes (Level 0 audit events).
+wevtutil epl Security (NextName "Events Security_Logon Events.evtx") "/q:*[System[(EventID=4624 or EventID=4625 or EventID=4648 or EventID=4776)]]" 2>$null
 Log "event logs done"
 
 # ---- 2. Registry exports (reg.exe emits UTF-16 .reg, as the parser expects) -
@@ -55,6 +60,8 @@ $regKeys = @(
     'HKLM\SOFTWARE\Microsoft\Enrollments',                           # ESP FirstSync state
     'HKLM\SOFTWARE\Microsoft\IntuneManagementExtension',
     'HKLM\SOFTWARE\Policies\Microsoft\FVE',                          # BitLocker policy
+    'HKLM\SOFTWARE\Policies\Microsoft\WindowsStore',                 # Store auto-update / RemoveWindowsStore (not in the Intune pack)
+    'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications',  # what vuln scanners read for UWP versions
     'HKLM\SOFTWARE\Microsoft\Policies\PassportForWork',              # WHfB tombstones (PIN expiry lives here)
     'HKLM\SYSTEM\CurrentControlSet\Control\ComputerName',            # pending rename
     'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion'              # build/UBR
@@ -73,7 +80,9 @@ $commands = @(
     @{ Label = 'ipconfig_all';           Cmd = { ipconfig /all } },
     @{ Label = 'systeminfo';             Cmd = { systeminfo } },
     @{ Label = 'audio_endpoints';        Cmd = { Get-PnpDevice -Class AudioEndpoint,MEDIA | Sort-Object Class | Format-List FriendlyName, Status, InstanceId } },
-    @{ Label = 'net_localgroup';         Cmd = { net localgroup Users; net localgroup Administrators } }
+    @{ Label = 'net_localgroup';         Cmd = { net localgroup Users; net localgroup Administrators } },
+    @{ Label = 'appx_allusers';          Cmd = { Get-AppxPackage -AllUsers | Sort-Object Name | Format-Table Name, Version, PackageUserInformation -AutoSize -Wrap } },
+    @{ Label = 'store_services';         Cmd = { Get-Service InstallService, AppXSvc, ClipSVC, LicenseManager | Format-Table Name, Status, StartType } }
 )
 foreach ($c in $commands) {
     & $c.Cmd 2>&1 | Out-File -FilePath (NextName "Command $($c.Label) output.log") -Encoding utf8

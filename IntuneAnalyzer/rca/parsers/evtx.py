@@ -55,8 +55,10 @@ def _ps_exe() -> str:
 # warn+error hides the answer.
 _ALL_LEVEL_CHANNELS = ("system events.evtx", "bitlocker_management", "tpm",
                        # Hello provisioning/success and NGC key registration are
-                       # info-level; without them a PIN rebuild is invisible (field case).
-                       "helloforbusiness", "user device registration")
+                       # info-level; without them a PIN rebuild is invisible (case 35).
+                       "helloforbusiness", "user device registration",
+                       # Security audit events (4624/4625) are Level 0 too.
+                       "security_logon")
 
 
 def parse_file(
@@ -71,7 +73,7 @@ def parse_file(
         # No Level filter at all: classic providers (Service Control Manager
         # 7036 service start/stop, User32, EventLog) log at Level 0 (LogAlways),
         # which a 1-4 filter silently drops — that hid every service event and
-        # made "no Zscaler services ever ran" look true in a field case.
+        # made "no Zscaler services ever ran" look true on case 33.
         levels = None
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tf:
         out_json = Path(tf.name)
