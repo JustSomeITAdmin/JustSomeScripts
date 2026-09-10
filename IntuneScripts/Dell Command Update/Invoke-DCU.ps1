@@ -51,10 +51,27 @@ function Write-Log {
     "[$(Get-Date -Format s)] $Message" | Out-File -FilePath $log -Append -Encoding utf8
 }
 
+# DCU skips the BIOS flash while BitLocker conversion is running, which it always is during ESP.
+# -autoSuspendBitLocker only suspends protection, not the conversion - manage-bde -pause does that.
+function Suspend-Conversion {
+    $status = (Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus
+    if ($status -like '*InProgress') {
+        Write-Log "BitLocker status is $status; pausing conversion so the BIOS update isn't skipped"
+        & "$env:SystemRoot\System32\manage-bde.exe" -pause $env:SystemDrive 2>&1 | Out-Null
+    }
+}
+
+# Must run on every exit path - a paused conversion left behind never finishes encrypting.
+function Resume-Conversion {
+    & "$env:SystemRoot\System32\manage-bde.exe" -resume $env:SystemDrive 2>&1 | Out-Null
+    Write-Log "Resumed BitLocker conversion; status is now $((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus)"
+}
+
 # One-shot: drop the script and the task so a later DCU upgrade doesn't re-fire event 1033.
 # Script first - deleting the task can take the running instance with it.
 function Exit-Clean {
     param([int]$Code)
+    Resume-Conversion
     Write-Log "Cleaning up: removing $self and scheduled task '$taskName'"
     Remove-Item -LiteralPath $self -Force -ErrorAction SilentlyContinue
     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
@@ -134,15 +151,24 @@ $applyArgs = @(
 for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
     Write-Log "Apply attempt $attempt starting"
 
-    & $dcuPath @applyArgs
+    Suspend-Conversion
+
+    $applyOutput = & $dcuPath @applyArgs 2>&1
     $applyExit = $LASTEXITCODE
     Write-Log "ApplyUpdates exit code: $applyExit"
+
+    # Exit code is 0/1 even when the BIOS was silently dropped, so the warning is the only signal.
+    if ($applyOutput -match 'BitLocker operation') {
+        Write-Log "BIOS update was skipped for BitLocker; retrying in 30 seconds"
+        Start-Sleep -Seconds 30
+        continue
+    }
 
     if ($applyExit -eq 0) {
         Write-Log "ApplyUpdates succeeded"
         Exit-Clean 0
     }
-    if ($applyExit -match '1|5') {
+    if ($applyExit -in 1, 5) {
         Write-Log "ApplyUpdates succeeded, but a reboot is needed"
         Exit-Clean 0
     }
