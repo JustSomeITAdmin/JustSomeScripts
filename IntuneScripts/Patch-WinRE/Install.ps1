@@ -28,7 +28,17 @@ if ($MatchedStorageDrivers) {
     }
     #This is use to export the driver(s), I suppose Export-WindowsDriver could be used as well
     $MatchedStorageDrivers | ForEach-Object { pnputil.exe /export-driver $_.Driver $DriverDir }
-    #$WorkingDirectory = "$($env:TEMP)\WinRE-Stuff"
+    # a failed Patch-WinRE run leaves an Invalid orphaned mount of winre.wim in the mount dir
+    # that blocks every later run at the mount step - and it is invisible to Get-ChildItem 
+    # and Get-WindowsImage -Mounted (returns nothing); only Cleanup-Mountpoints clears it, and it
+    # leaves valid mounts alone, so run it unconditionally rather than gating on those blind checks.
+    Write-Output "Clearing stale/orphaned DISM mount points"
+    & dism.exe /Cleanup-Mountpoints
+    Remove-Item -Recurse -Force "$WorkingDirectory\Mount\*" -ErrorAction SilentlyContinue
+    # PS 5.1 cannot read \\?\Volume{...} paths, so Patch-WinRE's backup step dies whenever
+    # WinRE is enabled (wim lives on the recovery volume). Disabling WinRE parks winre.wim at
+    # C:\Windows\System32\Recovery (a plain path); Patch-WinRE re-enables it when it completes.
+    & reagentc.exe /disable | Out-Null
     & powershell.exe -file $(Join-Path $PSScriptRoot 'Patch-WinRE.ps1') -WorkingDirectory $WorkingDirectory -FilesDriver $DriverDir -RecoveryDriveSizeInGB 2GB -BackupDirectory "$WorkingDirectory\Backups" -MountDirectory "$WorkingDirectory\Mount" -LogDirectory "$WorkingDirectory\Logs"
     Write-Output "Last exit code was: $LASTEXITCODE"
     if ($LASTEXITCODE -eq 0) { 
@@ -37,4 +47,4 @@ if ($MatchedStorageDrivers) {
     }
     else { exit $LASTEXITCODE }
 }
-else { exit $LASTEXITCODE }
+else { exit 1 }
