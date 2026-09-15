@@ -5,12 +5,20 @@ $BiosPassword = ""
 
 if ((Get-CimInstance -ClassName CIM_BIOSElement).Manufacturer -notmatch 'Dell|Alienware') { exit 0 }
 
+$debugLog = 'C:\ProgramData\Dell\InvokeDCU-debug.log'
+
+# Stale task from a pre-cleanup run: remove it, and leave the same marker the inner script leaves.
 $t = Get-ScheduledTask -TaskName 'Run on Dell Command Update Install' -ErrorAction SilentlyContinue
-if ($t -and (Get-ScheduledTaskInfo -InputObject $t).LastTaskResult -eq 0) { 
+if ($t -and (Get-ScheduledTaskInfo -InputObject $t).LastTaskResult -eq 0) {
     if (Test-Path 'C:\Windows\Tasks\InvokeDCU.ps1') { Remove-Item 'C:\Windows\Tasks\InvokeDCU.ps1' -Force -ErrorAction SilentlyContinue }
     Unregister-ScheduledTask -TaskName 'Run on Dell Command Update Install' -Confirm:$false
+    "[$(Get-Date -Format s)] Cleaning up: removing C:\Windows\Tasks\InvokeDCU.ps1 and scheduled task 'Run on Dell Command Update Install' (stale, removed by platform script)" |
+        Out-File -FilePath $debugLog -Append -Encoding utf8
     exit 0
 }
+
+# Intune re-runs this script fleet-wide on every edit. Either cleanup path leaves this line behind; don't re-arm.
+if ((Test-Path $debugLog) -and (Select-String -Path $debugLog -Pattern 'Cleaning up: removing' -Quiet)) { exit 0 }
 
 $taskName = "Run on Dell Command Update Install"
 $taskDescription = "Triggers when MsiInstaller logs Event ID 1033 for Dell Command | Update for Windows Universal."
@@ -105,7 +113,7 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
         break
     }
 
-    Write-Log "Configure returned retryable code 2, retrying in 30 seconds"
+    Write-Log "Configure returned $configureExit, retrying in 30 seconds"
     Start-Sleep -Seconds 30
 }
 
@@ -130,7 +138,7 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
         break
     }
 
-    Write-Log "Lock settings returned retryable code 2, retrying in 30 seconds"
+    Write-Log "Lock settings returned $lockExit, retrying in 30 seconds"
     Start-Sleep -Seconds 30
 }
 
@@ -182,7 +190,7 @@ for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
         Exit-Clean 0
     }
 
-    Write-Log "ApplyUpdates returned retryable code 2, retrying in 30 seconds"
+    Write-Log "ApplyUpdates returned $applyExit, retrying in 30 seconds"
     Start-Sleep -Seconds 30
 }
 
