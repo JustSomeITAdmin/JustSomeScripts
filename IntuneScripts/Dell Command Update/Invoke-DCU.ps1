@@ -3,6 +3,10 @@
 # Set your BIOS password here. Leave as empty string to skip the -BiosPassword flag entirely.
 $BiosPassword = ""
 
+# Days the task stays armed waiting for DCU to install. ESP normally finishes the same day;
+# raise this if devices sit pre-provisioned on a shelf between enrollment and first use.
+$taskLifetimeDays = 7
+
 if ((Get-CimInstance -ClassName CIM_BIOSElement).Manufacturer -notmatch 'Dell|Alienware') { exit 0 }
 
 $debugLog = 'C:\ProgramData\Dell\InvokeDCU-debug.log'
@@ -87,6 +91,9 @@ function Exit-Clean {
     Write-Log "Cleaning up: removing $self and scheduled task '$taskName'"
     Remove-Item -LiteralPath $self -Force -ErrorAction SilentlyContinue
     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+    # The line above states intent; this one is the proof. Both should read False.
+    $taskLeft = [bool](Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)
+    Write-Log "Cleanup verified: task present=$taskLeft, script present=$(Test-Path -LiteralPath $self)"
     exit $Code
 }
 
@@ -210,13 +217,15 @@ $class = Get-CimClass MSFT_TaskEventTrigger root/Microsoft/Windows/TaskScheduler
 $Trigger_onEvent = $class | New-CimInstance -ClientOnly
 $trigger_onEvent.Enabled = $true
 $trigger_onEvent.Subscription = $subscription
+# Backstop the OS enforces: past this date the trigger cannot fire, whatever happened to the inner script.
+$trigger_onEvent.EndBoundary = (Get-Date).AddDays($taskLifetimeDays).ToString('s')
 
 #$trigger = New-ScheduledTaskTrigger -Once -At (get-date)
 
 # Optional principal: run as SYSTEM
 $principal = New-ScheduledTaskPrincipal "NT AUTHORITY\SYSTEM"
 # Optional settings
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DeleteExpiredTaskAfter (New-TimeSpan -Seconds 0)
 
 # Register the task
 Register-ScheduledTask -TaskName $taskName -Description $taskDescription -Action $action -Trigger $trigger_onEvent -Principal $principal -Settings $settings -Force | Out-Null
