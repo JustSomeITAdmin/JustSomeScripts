@@ -10,6 +10,7 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 | [IntuneScripts/](IntuneScripts/) | Scripts for Microsoft Intune device management |
 | [WinPE/](WinPE/) | Scripts for driver injection during OS deployment (WinPE / ConfigMgr) |
 | [IntuneAnalyzer/](IntuneAnalyzer/) | Local-first root-cause analysis for Intune "Collect diagnostics" ZIPs — parse, correlate, rank findings with evidence (Python + PowerShell + SQLite, optional local LLM) |
+| [OpenDriverUpdater/](OpenDriverUpdater/) | Monthly, one-reboot OEM driver updates (Dell / Lenovo / HP / Windows Update) as a config-driven PSAppDeployToolkit 4.2 package — deploy via Intune, ConfigMgr, or standalone (MIT) |
 
 ## Quick Links
 
@@ -25,6 +26,9 @@ A collection of scripts and tools I use in my day-to-day as an IT admin. These a
 - [Upgrade Windows Home To Pro](IntuneScripts/Upgrade%20Windows%20Home%20To%20Pro/) - Upgrade systems with Windows Home to Pro using a MAK key
 - [BIOS Password Retrieval](IntuneScripts/BIOS%20Password%20Retrieval/) - Retrieve the Intune-escrowed BIOS password for a device via Graph API
 - [Xerox Printer Install](IntuneScripts/Xerox%20Printer%20Install/) - Self-service Xerox AltaLink printer install: SNMP model detection, runtime V4 driver download, and Standard Accounting (PSADT v4.2) [only for AltraLink Cxxx models]
+
+### Driver Updates (Intune / ConfigMgr / standalone)
+- [OpenDriverUpdater](OpenDriverUpdater/) - Installs OEM drivers from the vendors' own catalogs (Dell SDP, Lenovo LCU, HP Image Assistant, Windows Update for everyone else) once a month in your Patch Tuesday window and reboots **once**, on your schedule — not whenever three vendors ship. Pilot + Production rings, cancellable ask then forced countdown, `driverConfig.json` for everything org-specific, `setup.ps1` generates the Intune detection scripts (PSADT v4.2)
 
 ### Intune Analyzer
 - [IntuneAnalyzer](IntuneAnalyzer/) - Drop in a `DiagLogs-*.zip`, get ranked evidence-cited findings: Win32 app failures, ESP wedges, BitLocker recovery triggers (Secure Boot CA / boot-manager swap / firmware), LocalUsersAndGroups replace bugs, unattended BIOS flashes, WHfB tombstones, WU/restart collisions. Web UI + CLI; drop-in Python rules; runs entirely on your machine (`install.ps1`)
@@ -51,3 +55,4 @@ Third-party tools in `bin/` retain their original licenses (GPL where applicable
 - [MHimken](https://github.com/MHimken/WinRE-Customization) — WinRE patching script used by Patch-WinRE
 - [PSAppDeployToolkit](https://psappdeploytoolkit.com/) — PSInvoker executable
 - [OSDeploy / David Segura](https://github.com/OSDeploy/OSD) — OSD PowerShell module and OSDCloud
+- [PSWindowsUpdate](https://www.powershellgallery.com/packages/PSWindowsUpdate) and [Lenovo.Client.Update](https://www.powershellgallery.com/packages/Lenovo.Client.Update) — modules OpenDriverUpdater fetches at runtime for the Windows Update and Lenovo paths

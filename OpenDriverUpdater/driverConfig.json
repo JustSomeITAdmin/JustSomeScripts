@@ -1,0 +1,41 @@
+{
+  "organization": "Contoso",
+  "publisher": "Contoso IT",
+  "installTitle": "Contoso Driver Update Service",
+  "packageVersion": "1.0.0",
+  "taskName": "Contoso-DriverUpdate",
+  "registryRoot": "HKLM:\\SOFTWARE\\Contoso\\Drivers",
+  "stateDir": "%ProgramData%\\Contoso\\DriverUpdates",
+
+  "schedule": {
+    "daysAfterPatchTuesday": 3,
+    "windowDays": 7,
+    "promptDeadlineDays": 5
+  },
+
+  "restart": {
+    "countdownHours": 23,
+    "countdownMinutes": 59,
+    "countdownNoHideHours": 1,
+    "restartWhenNoUser": true,
+    "minBatteryPercent": 50
+  },
+
+  "profiles": {
+    "Production": {
+      "time": "10:00",
+      "deployMode": "Auto",
+      "prompt": true,
+      "blockOnConsoleUser": false,
+      "restartAfterCycle": true
+    },
+    "Pilot": {
+      "time": "12:00",
+      "deployMode": "Auto",
+      "prompt": true,
+      "blockOnConsoleUser": false,
+      "restartAfterCycle": true,
+      "daysAfterPatchTuesday": 0
+    }
+  }
+}

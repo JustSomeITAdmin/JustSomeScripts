@@ -1,0 +1,16 @@
+# PSAppDeployToolkit module + launcher exe are fetched by tools/Get-PSADT.ps1, not committed.
+/PSAppDeployToolkit/
+/Invoke-AppDeployToolkit.exe
+
+# Build / runtime / local test artifacts
+/logs/
+*.intunewin
+/last-run.json
+/work/
+*.log
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.vs/
+.vscode/
