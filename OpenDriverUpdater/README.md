@@ -60,7 +60,7 @@ git clone https://github.com/JustSomeITAdmin/JustSomeScripts.git
 cd JustSomeScripts\OpenDriverUpdater
 
 # 1. Edit driverConfig.json for your organization (see Configuration below), or run setup.ps1 -Interactive to fill
-#    the core fields. Optionally drop your logo at Assets\Icon.png and point the Intune app's Logo at it.
+#    the core fields. Optionally drop your logo at Assets\AppIcon.png - it brands every dialog the package shows (the Intune app's own Logo is set in the portal).
 
 # 2. Run setup. It validates the config, fetches PSAppDeployToolkit 4.2 (module + Invoke-AppDeployToolkit.exe, both
 #    gitignored), generates one Detection\ script per profile stamped from the config, and syncs the launcher's

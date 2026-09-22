@@ -372,10 +372,14 @@ function Invoke-ODURestart {
     $n = [int]$Pending.PromptCount + 1
     $forced = $enforcing
     Set-ODUState @{ PromptShownUtc = (Get-Date).ToUniversalTime().ToString('o'); PromptCount = $n }
+    # Name the vendor so the prompt reads as being about *this* device, but tame the raw BIOS string: words of 4+ capitals
+    # become title case ("LENOVO" -> "Lenovo"); short acronyms ("HP", "MSI") and mixed-case names ("Dell Inc.") stay as-is.
+    $vendor = [regex]::Replace("$($Pending.Vendor)".Trim(), '\b[A-Z]{4,}\b', [System.Text.RegularExpressions.MatchEvaluator]{ param($m) $m.Value.Substring(0, 1) + $m.Value.Substring(1).ToLower() })
+    $from = if ($vendor) { "Driver updates from $vendor" } else { 'Driver updates' }
     if (-not $forced) {
         # Gentle ask: no countdown, nothing forced. Restart Now or Cancel; asked again tomorrow.
         $daysLeft = [Math]::Max(0, ($deadline - $today).Days)
-        $msg = "Driver updates from $($Pending.Vendor) were installed and finish with your next restart. Restart now if convenient, or Cancel and restart when it suits you. $(if ($daysLeft -gt 0) { "You will be reminded daily; from $($deadline.ToString('dddd, MMMM d')) the restart becomes automatic." } else { 'This is the last reminder before the restart becomes automatic.' })"
+        $msg = "$from were installed and will finish with your next restart. Restart now if convenient, or Cancel and restart when it suits you. $(if ($daysLeft -gt 0) { "You will be reminded daily; from $($deadline.ToString('dddd, MMMM d')) the restart becomes automatic." } else { 'This is the last reminder before the restart becomes automatic.' })"
         Write-ADTLogEntry -Message "Restart prompt $n (no countdown, Cancel offered; deadline $($deadline.ToString('yyyy-MM-dd'))) for the restart pending since [$($Pending.RebootPendingSince)]."
         Show-ADTInstallationRestartPrompt -NoCountdown -AllowCancel `
             -Subtitle 'Driver updates need a restart' `
@@ -383,7 +387,7 @@ function Invoke-ODURestart {
             -CustomMessage -CustomMessageText $msg
     }
     else {
-        $msg = "Driver updates from $($Pending.Vendor) have been waiting for a restart since $(([datetime]$Pending.RebootPendingSince).ToLocalTime().ToString('MMMM d')). This restart can no longer be postponed. Save your work; the computer restarts automatically when the countdown ends."
+        $msg = "$from have been waiting for a restart since $(([datetime]$Pending.RebootPendingSince).ToLocalTime().ToString('MMMM d')). This restart can no longer be postponed. Save your work; the computer restarts automatically when the countdown ends."
         Write-ADTLogEntry -Message "Restart prompt $n (deadline reached: countdown $($cfg.RestartCountdown), no Cancel) for the restart pending since [$($Pending.RebootPendingSince)]."
         Show-ADTInstallationRestartPrompt -Countdown $cfg.RestartCountdown -CountdownNoHide $cfg.RestartCountdownNoHide -PersistPrompt `
             -Subtitle 'Driver updates need a restart' `
